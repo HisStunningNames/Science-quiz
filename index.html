@@ -176,7 +176,7 @@
     <p class="subtitle">SPEED Trivia... developed by the SPARK club</p>
     <button class="mode-btn blitz" onclick="startGame(3)">⚡ 3s Blitz</button>
     <button class="mode-btn moderate" onclick="startGame(5)">⏱️ 5s Moderate</button>
-    <button class="mode-btn slow" onclick="startGame(10)">🧘 10s Slow</button>
+    <button class="mode-btn slow" onclick="startGame(7)">🧘 7s Slow</button>
   </div>
 
   <!-- QUIZ SCREEN -->
@@ -436,7 +436,7 @@ function showEnd() {
   let text = "";
 
   // Exact scoring logic requested by user
-  if (timeLimit === 10) {
+  if (timeLimit === 7) {
     if (score === 10) { title = '🏆 Excellent!'; text = "Perfect score! You are a science genius."; }
     else if (score === 9) { title = '🌟 Good!'; text = "So close to perfect! Excellent work."; }
     else if (score === 8) { title = '👍 Fair!'; text = "Solid effort, you clearly know your stuff."; }
