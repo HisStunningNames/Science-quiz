@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Science Trivia Quiz</title>
+<style>
+  * { box-sizing: border-box; }
+
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: linear-gradient(160deg, #eef4ff, #f7f0ff);
+    min-height: 100vh;
+    margin: 0;
+    padding: 24px 16px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    color: #23233a;
+  }
+
+  .card {
+    background: #fff;
+    width: 100%;
+    max-width: 620px;
+    border-radius: 20px;
+    padding: 28px;
+    box-shadow: 0 10px 30px rgba(60, 60, 120, 0.12);
+  }
+
+  h1 { font-size: 1.5rem; margin: 0 0 4px; }
+
+  .subtitle {
+    color: #7a7a95;
+    font-size: 0.9rem;
+    margin: 0 0 22px;
+  }
+
+  #progress {
+    font-size: 0.85rem;
+    color: #6b6b8a;
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+
+  #question {
+    font-size: 1.15rem;
+    line-height: 1.5;
+    margin: 0 0 18px;
+  }
+
+  #options { display: grid; gap: 10px; }
+
+  .option {
+    text-align: left;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 2px solid #e2e2f0;
+    background: #fafaff;
+    font-size: 1rem;
+    font-family: inherit;
+    color: inherit;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .option:hover:not(:disabled) {
+    border-color: #9aa8ff;
+    background: #f0f3ff;
+    transform: translateX(3px);
+  }
+
+  .option:disabled { cursor: default; }
+
+  .option.correct {
+    border-color: #34c759;
+    background: #e9fbee;
+    font-weight: 600;
+  }
+
+  .option.wrong {
+    border-color: #ff5a5a;
+    background: #ffeded;
+  }
+
+  #explanation {
+    display: none;
+    margin-top: 18px;
+    padding: 16px;
+    border-radius: 12px;
+    background: #f4f6ff;
+    border-left: 5px solid #7b8cff;
+    line-height: 1.55;
+    font-size: 0.95rem;
+  }
+
+  .btn {
+    display: none;
+    margin-top: 18px;
+    padding: 13px 24px;
+    border: none;
+    border-radius: 12px;
+    background: #5566ff;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  .btn:hover { background: #4354e0; }
+
+  #end { display: none; text-align: center; }
+
+  #end h2 { font-size: 1.4rem; margin: 0 0 10px; }
+
+  #end p { color: #55556e; line-height: 1.6; margin: 0 0 22px; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>🔬 Science Trivia</h1>
+  <p class="subtitle">Grades 7–11 · no rocket science, promise</p>
+
+  <div id="quiz">
+    <div id="progress"></div>
+    <p id="question"></p>
+    <div id="options"></div>
+    <div id="explanation"></div>
+    <button class="btn" id="next-btn">Next question →</button>
+  </div>
+
+  <div id="end">
+    <h2 id="end-title"></h2>
+    <p id="end-text"></p>
+    <button class="btn" id="restart-btn" style="display:inline-block;">Play again 🔁</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   YOUR QUESTIONS LIVE HERE.
+   To add a question, copy one block { ... } and paste it in.
+   Remember: the comma goes BETWEEN blocks, not after the last.
+   "correct" counts from 0 — so 0 = first option, 1 = second...
+   ============================================================ */
+const questions = [
+  {
+    question: "Two identical balloons sit for 10 minutes — one in a warm sunny window, one in the freezer. Which one looks bigger?",
+    options: ["The one in the freezer", "The one in the warm window", "Both exactly the same", "The freezer one pops"],
+    correct: 1,
+    explanation: "Warm air inside the balloon moves faster and spreads out, pushing the balloon bigger. Cold air slows down and takes up less space."
+  },
+  {
+    question: "You drop a sugar cube into hot water and another into cold water. Which dissolves faster?",
+    options: ["The hot water one", "The cold water one", "They take the same time", "Neither dissolves"],
+    correct: 0,
+    explanation: "Hot water molecules are zooming around faster, so they crash into the sugar and break it apart quicker. That's why hot tea sweetens faster than iced tea."
+  },
+  {
+    question: "Why does ice float on top of water instead of sinking?",
+    options: ["It's frozen, so it's lighter", "Ice is less dense than liquid water", "Ice is attracted to air", "Fish hold it up"],
+    correct: 1,
+    explanation: "When water freezes, its molecules line up in a spread-out pattern. Same weight, more space = less dense. And less dense things float."
+  },
+  {
+    question: "In a storm, you see the lightning flash several seconds before you hear the thunder. Why?",
+    options: ["Light travels way faster than sound", "Thunder happens later on purpose", "Your eyes work faster than your ears", "The lightning is closer to you"],
+    correct: 0,
+    explanation: "Light reaches you almost instantly. Sound is much slower — roughly 1 km every 3 seconds. So the flash always wins the race."
+  },
+  {
+    question: "Which is heavier: 1 kg of feathers or 1 kg of iron?",
+    options: ["The iron", "The feathers", "They weigh exactly the same", "Depends on the weather"],
+    correct: 2,
+    explanation: "A kilogram is a kilogram! They weigh the same. The iron just takes up way less space because it's much denser."
+  },
+  {
+    question: "You mix baking soda and vinegar and it fizzes like crazy. What gas is in those bubbles?",
+    options: ["Oxygen", "Carbon dioxide", "Helium", "Hydrogen"],
+    correct: 1,
+    explanation: "Baking soda + vinegar makes carbon dioxide (CO₂) — the same gas you breathe out. The bubbles are CO₂ escaping."
+  },
+  {
+    question: "You step out of a pool on a windy day and feel chilly. Why?",
+    options: ["The water stays cold on your skin", "Evaporating water carries heat away from your skin", "Wind pushes cold air into you", "Your body stops making heat"],
+    correct: 1,
+    explanation: "As water evaporates off your skin, it takes heat energy with it. Wind speeds up evaporation, so you feel colder faster."
+  },
+  {
+    question: "You blow up a balloon and let go of the untied opening. It zips around the room. Why?",
+    options: ["The balloon is alive", "Air rushes out one way, pushing the balloon the other way", "Gravity pulls it sideways", "Static electricity"],
+    correct: 1,
+    explanation: "Air shoots out backward, so the balloon gets pushed forward. Every push has an equal push back — that's Newton's third law."
+  },
+  {
+    question: "Two identical bean plants. One on a sunny windowsill, one in a dark closet. After two weeks?",
+    options: ["The closet plant grows bigger", "The windowsill plant is greener and taller", "They look the same", "The closet plant turns into a mushroom"],
+    correct: 1,
+    explanation: "Plants use light to make their own food (photosynthesis). No light = no food = a sad, yellow, droopy plant."
+  },
+  {
+    question: "You drop the same tennis ball onto a hard floor and onto thick carpet. Where does it bounce higher?",
+    options: ["The hard floor", "The carpet", "Same height both times", "It doesn't bounce at all"],
+    correct: 0,
+    explanation: "The hard floor bounces the energy straight back. Carpet squishes and soaks up some of that energy, so the ball bounces lower."
+  }
+];
+
+/* ============================================================
+   Below here is the "engine" — it runs the quiz.
+   You don't need to change this unless you want to.
+   ============================================================ */
+
+let current = 0;
+let score = 0;
+
+const progressEl    = document.getElementById('progress');
+const questionEl    = document.getElementById('question');
+const optionsEl     = document.getElementById('options');
+const explanationEl = document.getElementById('explanation');
+const nextBtn       = document.getElementById('next-btn');
+const quizEl        = document.getElementById('quiz');
+const endEl         = document.getElementById('end');
+const endTitle      = document.getElementById('end-title');
+const endText       = document.getElementById('end-text');
+const restartBtn    = document.getElementById('restart-btn');
+
+function showQuestion() {
+  const q = questions[current];
+
+  // Reset the screen for the new question
+  explanationEl.style.display = 'none';
+  explanationEl.innerHTML = '';
+  nextBtn.style.display = 'none';
+  progressEl.textContent = `Question ${current + 1} of ${questions.length}  ·  Score: ${score}`;
+  questionEl.textContent = q.question;
+  optionsEl.innerHTML = '';
+
+  // Build one button per answer option
+  q.options.forEach(function (optionText, index) {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.textContent = optionText;
+    btn.onclick = function () { checkAnswer(index, btn); };
+    optionsEl.appendChild(btn);
+  });
+}
+
+function checkAnswer(chosenIndex, clickedBtn) {
+  const q = questions[current];
+  const allButtons = document.querySelectorAll('.option');
+
+  // Lock every button so they can't click twice
+  allButtons.forEach(function (b) { b.disabled = true; });
+
+  if (chosenIndex === q.correct) {
+    score++;
+    clickedBtn.classList.add('correct');
+    explanationEl.innerHTML = '<strong>✅ Nice one!</strong><br>' + q.explanation;
+  } else {
+    clickedBtn.classList.add('wrong');
+    allButtons[q.correct].classList.add('correct');
+    explanationEl.innerHTML = '<strong>❌ Not quite — but now you know!</strong><br>' + q.explanation;
+  }
+
+  progressEl.textContent = `Question ${current + 1} of ${questions.length}  ·  Score: ${score}`;
+  explanationEl.style.display = 'block';
+
+  nextBtn.style.display = 'inline-block';
+  nextBtn.textContent = (current === questions.length - 1) ? 'See my score →' : 'Next question →';
+}
+
+nextBtn.onclick = function () {
+  current++;
+  if (current < questions.length) {
+    showQuestion();
+  } else {
+    showEnd();
+  }
+};
+
+function showEnd() {
+  quizEl.style.display = 'none';
+  endEl.style.display = 'block';
+
+  const total = questions.length;
+  const percent = score / total;
+
+  if (percent === 1) {
+    endTitle.textContent = '🏆 ' + score + '/' + total + ' — perfect score!';
+    endText.textContent = "You didn't miss a single one. Genuinely impressive.";
+  } else if (percent >= 0.7) {
+    endTitle.textContent = '🎉 ' + score + '/' + total + ' — great job!';
+    endText.textContent = "You clearly know your stuff. A couple of sneaky ones got you, that's all.";
+  } else if (percent >= 0.4) {
+    endTitle.textContent = '👍 ' + score + '/' + total + ' — solid effort!';
+    endText.textContent = "You got a good chunk of them. Read back through the explanations and you'll nail it next time.";
+  } else {
+    endTitle.textContent = '🌱 ' + score + '/' + total + ' — good start!';
+    endText.textContent = "Everyone starts somewhere. The explanations are the whole point — now you know more than you did five minutes ago.";
+  }
+}
+
+restartBtn.onclick = function () {
+  current = 0;
+  score = 0;
+  endEl.style.display = 'none';
+  quizEl.style.display = 'block';
+  showQuestion();
+};
+
+// Kick everything off
+showQuestion();
+</script>
+
+</body>
+</html>
