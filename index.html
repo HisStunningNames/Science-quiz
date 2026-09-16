@@ -5,413 +5,289 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Science Trivia Quiz</title>
 <style>
-  * { box-sizing: border-box; }
+  * { box-sizing: border-box; user-select: none; }
 
   body {
     font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-    background: linear-gradient(160deg, #eef4ff, #f7f0ff);
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
     min-height: 100vh;
     margin: 0;
     padding: 24px 16px;
     display: flex;
     justify-content: center;
-    align-items: flex-start;
-    color: #23233a;
+    align-items: center;
+    color: #fff;
   }
 
   .card {
-    background: #fff;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     width: 100%;
     max-width: 620px;
-    border-radius: 20px;
-    padding: 28px;
-    box-shadow: 0 10px 30px rgba(60, 60, 120, 0.12);
+    border-radius: 24px;
+    padding: 32px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s ease;
   }
 
-  h1 { font-size: 1.5rem; margin: 0 0 4px; }
+  h1 { font-size: 2rem; margin: 0 0 8px; text-align: center; }
+  .subtitle { color: #a0a0c0; font-size: 1rem; margin: 0 0 30px; text-align: center; }
 
-  .subtitle {
-    color: #7a7a95;
-    font-size: 0.9rem;
-    margin: 0 0 22px;
-  }
-
-  #progress {
-    font-size: 0.85rem;
-    color: #6b6b8a;
-    font-weight: 600;
+  /* --- START SCREEN --- */
+  #start-screen { text-align: center; }
+  .mode-btn {
+    display: block;
+    width: 100%;
+    padding: 18px;
     margin-bottom: 14px;
+    border-radius: 16px;
+    border: none;
+    font-size: 1.1rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    color: #fff;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .mode-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+  .mode-btn:active { transform: translateY(0); }
+  .blitz { background: linear-gradient(135deg, #ff416c, #ff4b2b); }
+  .moderate { background: linear-gradient(135deg, #f7971e, #ffd200); color: #333; }
+  .slow { background: linear-gradient(135deg, #00b09b, #96c93d); }
+
+  /* --- QUIZ SCREEN --- */
+  #quiz-screen { display: none; }
+  
+  .timer-container {
+    width: 100%;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  #timer-bar {
+    height: 100%;
+    width: 100%;
+    background: #00e676;
+    border-radius: 10px;
+    transition: width 0.1s linear, background-color 0.3s;
+  }
+
+  .header-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: #a0a0c0;
+    font-weight: 600;
+    margin-bottom: 12px;
   }
 
   #question {
-    font-size: 1.15rem;
+    font-size: 1.25rem;
     line-height: 1.5;
-    margin: 0 0 18px;
+    margin: 0 0 24px;
+    min-height: 60px;
   }
 
-  #options { display: grid; gap: 10px; }
+  #options { display: grid; gap: 12px; }
 
   .option {
     text-align: left;
-    padding: 14px 16px;
-    border-radius: 12px;
-    border: 2px solid #e2e2f0;
-    background: #fafaff;
+    padding: 16px 20px;
+    border-radius: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
     font-size: 1rem;
     font-family: inherit;
-    color: inherit;
+    color: #fff;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all 0.2s ease;
   }
 
   .option:hover:not(:disabled) {
-    border-color: #9aa8ff;
-    background: #f0f3ff;
-    transform: translateX(3px);
+    border-color: #6a7cff;
+    background: rgba(106, 124, 255, 0.15);
+    transform: translateX(4px);
   }
 
-  .option:disabled { cursor: default; }
+  .option:disabled { cursor: default; opacity: 0.7; }
 
   .option.correct {
-    border-color: #34c759;
-    background: #e9fbee;
-    font-weight: 600;
+    border-color: #00e676;
+    background: rgba(0, 230, 118, 0.2);
+    font-weight: 700;
+    opacity: 1;
   }
 
   .option.wrong {
-    border-color: #ff5a5a;
-    background: #ffeded;
+    border-color: #ff4d4d;
+    background: rgba(255, 77, 77, 0.2);
+    opacity: 1;
   }
 
   #explanation {
     display: none;
-    margin-top: 18px;
+    margin-top: 20px;
     padding: 16px;
-    border-radius: 12px;
-    background: #f4f6ff;
-    border-left: 5px solid #7b8cff;
-    line-height: 1.55;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.08);
+    border-left: 5px solid #6a7cff;
+    line-height: 1.6;
     font-size: 0.95rem;
+    color: #d0d0e0;
   }
 
   .btn {
     display: none;
-    margin-top: 18px;
-    padding: 13px 24px;
+    width: 100%;
+    margin-top: 20px;
+    padding: 16px;
     border: none;
-    border-radius: 12px;
-    background: #5566ff;
+    border-radius: 14px;
+    background: #6a7cff;
     color: #fff;
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: 1.05rem;
+    font-weight: 700;
     font-family: inherit;
     cursor: pointer;
+    transition: background 0.2s;
   }
+  .btn:hover { background: #5566e0; }
 
-  .btn:hover { background: #4354e0; }
-
-  #end { display: none; text-align: center; }
-
-  #end h2 { font-size: 1.4rem; margin: 0 0 10px; }
-
-  #end p { color: #55556e; line-height: 1.6; margin: 0 0 22px; }
+  /* --- END SCREEN --- */
+  #end-screen { display: none; text-align: center; }
+  #end-screen h2 { font-size: 1.8rem; margin: 0 0 12px; }
+  #end-screen p { color: #a0a0c0; line-height: 1.6; margin: 0 0 30px; font-size: 1.05rem; }
+  .btn-container { display: flex; gap: 12px; }
+  .btn-container .btn { margin-top: 0; display: inline-block; }
+  .btn-secondary { background: rgba(255, 255, 255, 0.1); }
+  .btn-secondary:hover { background: rgba(255, 255, 255, 0.2); }
 </style>
 </head>
 <body>
 
 <div class="card">
-  <h1>🔬 Science Trivia</h1>
-  <p class="subtitle">very peak website built by SPARK club</p>
+  <!-- MAIN MENU -->
+  <div id="start-screen">
+    <h1>🔬 Science Trivia</h1>
+    <p class="subtitle">Choose your speed. Can you handle the pressure?</p>
+    <button class="mode-btn blitz" onclick="startGame(3)">⚡ 3s Blitz</button>
+    <button class="mode-btn moderate" onclick="startGame(5)">⏱️ 5s Moderate</button>
+    <button class="mode-btn slow" onclick="startGame(10)">🧘 10s Slow</button>
+  </div>
 
-  <div id="quiz">
-    <div id="progress"></div>
+  <!-- QUIZ SCREEN -->
+  <div id="quiz-screen">
+    <div class="timer-container"><div id="timer-bar"></div></div>
+    <div class="header-info">
+      <span id="progress"></span>
+      <span id="score-display">Score: 0</span>
+    </div>
     <p id="question"></p>
     <div id="options"></div>
     <div id="explanation"></div>
     <button class="btn" id="next-btn">Next question →</button>
   </div>
 
-  <div id="end">
+  <!-- END SCREEN -->
+  <div id="end-screen">
     <h2 id="end-title"></h2>
     <p id="end-text"></p>
-    <button class="btn" id="restart-btn" style="display:inline-block;">Play again 🔁</button>
+    <div class="btn-container">
+      <button class="btn btn-secondary" onclick="goToMainMenu()">Main Menu</button>
+      <button class="btn" onclick="restartSameMode()">Play Again 🔁</button>
+    </div>
   </div>
 </div>
 
 <script>
 /* ============================================================
    THE MASSIVE QUESTION POOL
-   The quiz will randomly pick 10 of these every time you play.
    ============================================================ */
 const questions = [
   // --- PHYSICS ---
-  {
-    question: "Two identical balloons sit for 10 minutes — one in a warm sunny window, one in the freezer. Which one looks bigger?",
-    options: ["The one in the freezer", "The one in the warm window", "Both exactly the same", "The freezer one pops"],
-    correct: 1,
-    explanation: "Warm air inside the balloon moves faster and spreads out, pushing the balloon bigger. Cold air slows down and takes up less space."
-  },
-  {
-    question: "You drop a tennis ball onto a hard floor and onto thick carpet. Where does it bounce higher?",
-    options: ["The hard floor", "The carpet", "Same height both times", "It doesn't bounce at all"],
-    correct: 0,
-    explanation: "The hard floor bounces the energy straight back. Carpet squishes and soaks up some of that energy, so the ball bounces lower."
-  },
-  {
-    question: "You blow up a balloon and let go of the untied opening. It zips around the room. Why?",
-    options: ["The balloon is alive", "Air rushes out one way, pushing the balloon the other way", "Gravity pulls it sideways", "Static electricity"],
-    correct: 1,
-    explanation: "Air shoots out backward, so the balloon gets pushed forward. Every push has an equal push back — that's Newton's third law."
-  },
-  {
-    question: "Which is heavier: 1 kg of feathers or 1 kg of iron?",
-    options: ["The iron", "The feathers", "They weigh exactly the same", "Depends on the weather"],
-    correct: 2,
-    explanation: "A kilogram is a kilogram! They weigh the same. The iron just takes up way less space because it's much denser."
-  },
-  {
-    question: "Why does ice float on top of water instead of sinking?",
-    options: ["It's frozen, so it's lighter", "Ice is less dense than liquid water", "Ice is attracted to air", "Fish hold it up"],
-    correct: 1,
-    explanation: "When water freezes, its molecules line up in a spread-out pattern. Same weight, more space = less dense. And less dense things float."
-  },
-  {
-    question: "What force keeps the Moon orbiting around the Earth?",
-    options: ["Magnetism", "Gravity", "Wind", "Friction"],
-    correct: 1,
-    explanation: "Gravity is the invisible force pulling objects toward each other. The Earth's gravity pulls on the Moon, keeping it in orbit."
-  },
-  {
-    question: "You step out of a pool on a windy day and feel chilly. Why?",
-    options: ["The water stays cold on your skin", "Evaporating water carries heat away from your skin", "Wind pushes cold air into you", "Your body stops making heat"],
-    correct: 1,
-    explanation: "As water evaporates off your skin, it takes heat energy with it. Wind speeds up evaporation, so you feel colder faster."
-  },
-  {
-    question: "What simple machine is a seesaw?",
-    options: ["A pulley", "A wedge", "A lever", "A wheel and axle"],
-    correct: 2,
-    explanation: "A seesaw is a classic lever! It pivots on a fixed point called a fulcrum to lift a load."
-  },
-  {
-    question: "Which travels faster: Light or Sound?",
-    options: ["Sound", "Light", "They travel at the same speed", "Depends on the weather"],
-    correct: 1,
-    explanation: "Light travels at about 300,000 kilometers per second. Sound only travels about 343 meters per second in air. Light is vastly faster!"
-  },
-  {
-    question: "You are in a dark room with no windows. You flip a light switch. How long does it take for the room to light up?",
-    options: ["Instantly", "About 1 second", "About 5 seconds", "It depends on the size of the room"],
-    correct: 0,
-    explanation: "Light travels so fast that in a small room, it appears to fill the space instantly."
-  },
-  {
-    question: "What unit do we use to measure electrical current?",
-    options: ["Volts", "Watts", "Amperes (Amps)", "Ohms"],
-    correct: 2,
-    explanation: "Amperes (Amps) measure the flow of electricity. Volts measure the push, and Watts measure the power used."
-  },
-  {
-    question: "What happens to light when it hits a mirror?",
-    options: ["It is absorbed", "It is refracted", "It is reflected", "It turns into sound"],
-    correct: 2,
-    explanation: "Mirrors are smooth and shiny, so they bounce light back. This bouncing is called reflection."
-  },
-
+  { question: "Two identical balloons sit for 10 minutes — one in a warm sunny window, one in the freezer. Which one looks bigger?", options: ["The one in the freezer", "The one in the warm window", "Both exactly the same", "The freezer one pops"], correct: 1, explanation: "Warm air inside the balloon moves faster and spreads out, pushing the balloon bigger. Cold air slows down and takes up less space." },
+  { question: "You drop a tennis ball onto a hard floor and onto thick carpet. Where does it bounce higher?", options: ["The hard floor", "The carpet", "Same height both times", "It doesn't bounce at all"], correct: 0, explanation: "The hard floor bounces the energy straight back. Carpet squishes and soaks up some of that energy, so the ball bounces lower." },
+  { question: "You blow up a balloon and let go of the untied opening. It zips around the room. Why?", options: ["The balloon is alive", "Air rushes out one way, pushing the balloon the other way", "Gravity pulls it sideways", "Static electricity"], correct: 1, explanation: "Air shoots out backward, so the balloon gets pushed forward. Every push has an equal push back — that's Newton's third law." },
+  { question: "Which is heavier: 1 kg of feathers or 1 kg of iron?", options: ["The iron", "The feathers", "They weigh exactly the same", "Depends on the weather"], correct: 2, explanation: "A kilogram is a kilogram! They weigh the same. The iron just takes up way less space because it's much denser." },
+  { question: "Why does ice float on top of water instead of sinking?", options: ["It's frozen, so it's lighter", "Ice is less dense than liquid water", "Ice is attracted to air", "Fish hold it up"], correct: 1, explanation: "When water freezes, its molecules line up in a spread-out pattern. Same weight, more space = less dense. And less dense things float." },
+  { question: "What force keeps the Moon orbiting around the Earth?", options: ["Magnetism", "Gravity", "Wind", "Friction"], correct: 1, explanation: "Gravity is the invisible force pulling objects toward each other. The Earth's gravity pulls on the Moon, keeping it in orbit." },
+  { question: "You step out of a pool on a windy day and feel chilly. Why?", options: ["The water stays cold on your skin", "Evaporating water carries heat away from your skin", "Wind pushes cold air into you", "Your body stops making heat"], correct: 1, explanation: "As water evaporates off your skin, it takes heat energy with it. Wind speeds up evaporation, so you feel colder faster." },
+  { question: "What simple machine is a seesaw?", options: ["A pulley", "A wedge", "A lever", "A wheel and axle"], correct: 2, explanation: "A seesaw is a classic lever! It pivots on a fixed point called a fulcrum to lift a load." },
+  { question: "Which travels faster: Light or Sound?", options: ["Sound", "Light", "They travel at the same speed", "Depends on the weather"], correct: 1, explanation: "Light travels at about 300,000 kilometers per second. Sound only travels about 343 meters per second in air. Light is vastly faster!" },
+  { question: "What unit do we use to measure electrical current?", options: ["Volts", "Watts", "Amperes (Amps)", "Ohms"], correct: 2, explanation: "Amperes (Amps) measure the flow of electricity. Volts measure the push, and Watts measure the power used." },
+  { question: "What happens to light when it hits a mirror?", options: ["It is absorbed", "It is refracted", "It is reflected", "It turns into sound"], correct: 2, explanation: "Mirrors are smooth and shiny, so they bounce light back. This bouncing is called reflection." },
+  { question: "If you double the force on an object but keep its mass the same, what happens to its acceleration?", options: ["It halves", "It doubles", "It stays the same", "It becomes zero"], correct: 1, explanation: "Force = Mass x Acceleration. If mass stays the same and force doubles, acceleration must double to balance the equation." },
+  { question: "Which of these is a renewable energy source?", options: ["Coal", "Natural Gas", "Solar", "Oil"], correct: 2, explanation: "Solar energy comes from the sun, which will keep shining for billions of years. Coal, gas, and oil are finite fossil fuels." },
+  
   // --- CHEMISTRY ---
-  {
-    question: "You mix baking soda and vinegar and it fizzes like crazy. What gas is in those bubbles?",
-    options: ["Oxygen", "Carbon dioxide", "Helium", "Hydrogen"],
-    correct: 1,
-    explanation: "Baking soda + vinegar makes carbon dioxide (CO₂) — the same gas you breathe out. The bubbles are CO₂ escaping."
-  },
-  {
-    question: "What is the chemical symbol for water?",
-    options: ["CO2", "H2O", "O2", "NaCl"],
-    correct: 1,
-    explanation: "H2O means two Hydrogen atoms bonded to one Oxygen atom. That's the recipe for water!"
-  },
-  {
-    question: "What is the pH of pure water?",
-    options: ["0", "7", "14", "It doesn't have a pH"],
-    correct: 1,
-    explanation: "Pure water is neutral, right in the middle of the pH scale, which is 7. Anything below 7 is an acid, and above 7 is a base."
-  },
-  {
-    question: "What state of matter has a definite volume but takes the shape of its container?",
-    options: ["Solid", "Liquid", "Gas", "Plasma"],
-    correct: 1,
-    explanation: "Liquids have a fixed amount of stuff (volume), but they flow to fill whatever shape they are poured into."
-  },
-  {
-    question: "If you leave a glass of water outside on a hot day, the water level drops. What is this process called?",
-    options: ["Condensation", "Evaporation", "Freezing", "Melting"],
-    correct: 1,
-    explanation: "Evaporation! The heat gives the water molecules enough energy to escape into the air as a gas (water vapor)."
-  },
-  {
-    question: "What gas makes up most of Earth's atmosphere?",
-    options: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Hydrogen"],
-    correct: 2,
-    explanation: "Nitrogen makes up about 78% of the air we breathe. Oxygen is only about 21%."
-  },
-  {
-    question: "Which of these is a chemical change?",
-    options: ["Ice melting", "Paper ripping", "Wood burning", "Sugar dissolving in water"],
-    correct: 2,
-    explanation: "Burning wood creates ash and smoke — a completely new substance. The other options are just physical changes."
-  },
-  {
-    question: "What is the center of an atom called?",
-    options: ["The electron cloud", "The nucleus", "The proton", "The molecule"],
-    correct: 1,
-    explanation: "The nucleus is the dense center of an atom, containing protons and neutrons. Electrons orbit around it."
-  },
+  { question: "You mix baking soda and vinegar and it fizzes like crazy. What gas is in those bubbles?", options: ["Oxygen", "Carbon dioxide", "Helium", "Hydrogen"], correct: 1, explanation: "Baking soda + vinegar makes carbon dioxide (CO₂) — the same gas you breathe out. The bubbles are CO₂ escaping." },
+  { question: "What is the chemical symbol for water?", options: ["CO2", "H2O", "O2", "NaCl"], correct: 1, explanation: "H2O means two Hydrogen atoms bonded to one Oxygen atom. That's the recipe for water!" },
+  { question: "What is the pH of pure water?", options: ["0", "7", "14", "It doesn't have a pH"], correct: 1, explanation: "Pure water is neutral, right in the middle of the pH scale, which is 7. Anything below 7 is an acid, and above 7 is a base." },
+  { question: "What state of matter has a definite volume but takes the shape of its container?", options: ["Solid", "Liquid", "Gas", "Plasma"], correct: 1, explanation: "Liquids have a fixed amount of stuff (volume), but they flow to fill whatever shape they are poured into." },
+  { question: "If you leave a glass of water outside on a hot day, the water level drops. What is this process called?", options: ["Condensation", "Evaporation", "Freezing", "Melting"], correct: 1, explanation: "Evaporation! The heat gives the water molecules enough energy to escape into the air as a gas (water vapor)." },
+  { question: "What gas makes up most of Earth's atmosphere?", options: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Hydrogen"], correct: 2, explanation: "Nitrogen makes up about 78% of the air we breathe. Oxygen is only about 21%." },
+  { question: "Which of these is a chemical change?", options: ["Ice melting", "Paper ripping", "Wood burning", "Sugar dissolving in water"], correct: 2, explanation: "Burning wood creates ash and smoke — a completely new substance. The other options are just physical changes." },
+  { question: "What is the center of an atom called?", options: ["The electron cloud", "The nucleus", "The proton", "The molecule"], correct: 1, explanation: "The nucleus is the dense center of an atom, containing protons and neutrons. Electrons orbit around it." },
+  { question: "What is the most abundant element in the universe?", options: ["Oxygen", "Carbon", "Hydrogen", "Helium"], correct: 2, explanation: "Hydrogen is the simplest and most abundant element in the universe, making up about 75% of all normal matter." },
+  { question: "Which subatomic particle has a negative charge?", options: ["Proton", "Neutron", "Electron", "Positron"], correct: 2, explanation: "Electrons are negatively charged and orbit the nucleus. Protons are positive, and neutrons are neutral." },
 
   // --- BIOLOGY ---
-  {
-    question: "Two identical bean plants. One on a sunny windowsill, one in a dark closet. After two weeks?",
-    options: ["The closet plant grows bigger", "The windowsill plant is greener and taller", "They look the same", "The closet plant turns into a mushroom"],
-    correct: 1,
-    explanation: "Plants use light to make their own food (photosynthesis). No light = no food = a sad, yellow, droopy plant."
-  },
-  {
-    question: "What is the 'powerhouse' of the cell?",
-    options: ["The nucleus", "The mitochondria", "The cell wall", "The ribosome"],
-    correct: 1,
-    explanation: "Mitochondria take in nutrients and break them down to create energy for the cell."
-  },
-  {
-    question: "Which organ pumps blood around your body?",
-    options: ["The lungs", "The brain", "The liver", "The heart"],
-    correct: 3,
-    explanation: "Your heart is a powerful muscle that pumps blood carrying oxygen and nutrients to every part of your body."
-  },
-  {
-    question: "What process do plants use to make their own food?",
-    options: ["Respiration", "Photosynthesis", "Digestion", "Fermentation"],
-    correct: 1,
-    explanation: "Photosynthesis uses sunlight, water, and carbon dioxide to create sugar (food) and release oxygen."
-  },
-  {
-    question: "What part of the plant absorbs water and nutrients from the soil?",
-    options: ["The leaves", "The stem", "The roots", "The flower"],
-    correct: 2,
-    explanation: "Roots anchor the plant and have tiny hairs that absorb water and minerals from the soil."
-  },
-  {
-    question: "What do we call an animal that eats ONLY plants?",
-    options: ["Carnivore", "Herbivore", "Omnivore", "Predator"],
-    correct: 1,
-    explanation: "Herbivores (like cows, rabbits, and deer) eat only plants. Carnivores eat meat, and omnivores eat both."
-  },
-  {
-    question: "How many chromosomes do normal human body cells have?",
-    options: ["23", "46", "12", "100"],
-    correct: 1,
-    explanation: "Humans have 46 chromosomes in total — 23 pairs. You get one of each pair from your mom and one from your dad."
-  },
-  {
-    question: "What gas do humans breathe IN that is essential for life?",
-    options: ["Carbon Dioxide", "Nitrogen", "Oxygen", "Helium"],
-    correct: 2,
-    explanation: "We breathe in Oxygen (O2) to help our cells release energy from food. We breathe out Carbon Dioxide (CO2) as waste."
-  },
-  {
-    question: "What is the process called when a caterpillar turns into a butterfly?",
-    options: ["Evolution", "Metamorphosis", "Photosynthesis", "Mitosis"],
-    correct: 1,
-    explanation: "Metamorphosis is a major change in body shape during an animal's life cycle. Butterflies and frogs are famous examples."
-  },
-  {
-    question: "Which of these is NOT a function of the human skeleton?",
-    options: ["Protecting organs", "Making red blood cells", "Producing insulin", "Providing shape and support"],
-    correct: 2,
-    explanation: "Insulin is produced by the pancreas to regulate blood sugar. The skeleton protects organs, makes blood cells, and supports the body."
-  },
+  { question: "Two identical bean plants. One on a sunny windowsill, one in a dark closet. After two weeks?", options: ["The closet plant grows bigger", "The windowsill plant is greener and taller", "They look the same", "The closet plant turns into a mushroom"], correct: 1, explanation: "Plants use light to make their own food (photosynthesis). No light = no food = a sad, yellow, droopy plant." },
+  { question: "What is the 'powerhouse' of the cell?", options: ["The nucleus", "The mitochondria", "The cell wall", "The ribosome"], correct: 1, explanation: "Mitochondria take in nutrients and break them down to create energy for the cell." },
+  { question: "Which organ pumps blood around your body?", options: ["The lungs", "The brain", "The liver", "The heart"], correct: 3, explanation: "Your heart is a powerful muscle that pumps blood carrying oxygen and nutrients to every part of your body." },
+  { question: "What process do plants use to make their own food?", options: ["Respiration", "Photosynthesis", "Digestion", "Fermentation"], correct: 1, explanation: "Photosynthesis uses sunlight, water, and carbon dioxide to create sugar (food) and release oxygen." },
+  { question: "What part of the plant absorbs water and nutrients from the soil?", options: ["The leaves", "The stem", "The roots", "The flower"], correct: 2, explanation: "Roots anchor the plant and have tiny hairs that absorb water and minerals from the soil." },
+  { question: "What do we call an animal that eats ONLY plants?", options: ["Carnivore", "Herbivore", "Omnivore", "Predator"], correct: 1, explanation: "Herbivores (like cows, rabbits, and deer) eat only plants. Carnivores eat meat, and omnivores eat both." },
+  { question: "How many chromosomes do normal human body cells have?", options: ["23", "46", "12", "100"], correct: 1, explanation: "Humans have 46 chromosomes in total — 23 pairs. You get one of each pair from your mom and one from your dad." },
+  { question: "What gas do humans breathe IN that is essential for life?", options: ["Carbon Dioxide", "Nitrogen", "Oxygen", "Helium"], correct: 2, explanation: "We breathe in Oxygen (O2) to help our cells release energy from food. We breathe out Carbon Dioxide (CO2) as waste." },
+  { question: "What is the process called when a caterpillar turns into a butterfly?", options: ["Evolution", "Metamorphosis", "Photosynthesis", "Mitosis"], correct: 1, explanation: "Metamorphosis is a major change in body shape during an animal's life cycle. Butterflies and frogs are famous examples." },
+  { question: "Which of these is NOT a function of the human skeleton?", options: ["Protecting organs", "Making red blood cells", "Producing insulin", "Providing shape and support"], correct: 2, explanation: "Insulin is produced by the pancreas to regulate blood sugar. The skeleton protects organs, makes blood cells, and supports the body." },
+  { question: "What is the basic unit of life?", options: ["The atom", "The molecule", "The cell", "The organ"], correct: 2, explanation: "The cell is the smallest structural and functional unit of an organism. All living things are made of cells." },
 
   // --- EARTH & SPACE ---
-  {
-    question: "What causes day and night on Earth?",
-    options: ["The Earth orbiting the Sun", "The Earth spinning on its axis", "The Moon blocking the Sun", "The Sun moving around the Earth"],
-    correct: 1,
-    explanation: "The Earth rotates (spins) on its axis every 24 hours. The side facing the Sun has day, and the side facing away has night."
-  },
-  {
-    question: "What is the center of our solar system?",
-    options: ["The Earth", "The Moon", "The Sun", "Jupiter"],
-    correct: 2,
-    explanation: "The Sun is the center of our solar system. All the planets, including Earth, orbit around it."
-  },
-  {
-    question: "Which planet is known as the Red Planet?",
-    options: ["Venus", "Mars", "Jupiter", "Saturn"],
-    correct: 1,
-    explanation: "Mars looks red because its soil is rich in iron oxide — basically rust!"
-  },
-  {
-    question: "What layer of the Earth do we live on?",
-    options: ["The core", "The mantle", "The crust", "The atmosphere"],
-    correct: 2,
-    explanation: "The crust is the thin, rocky outer layer of the Earth. It's where all life exists."
-  },
-  {
-    question: "What causes the ocean tides?",
-    options: ["Wind", "The Earth's rotation", "The Moon's gravity", "Fish swimming"],
-    correct: 2,
-    explanation: "The Moon's gravity pulls on the Earth's oceans, causing the water to bulge out towards the Moon. This creates high and low tides."
-  },
-  {
-    question: "What is the hardest natural substance on Earth?",
-    options: ["Gold", "Iron", "Diamond", "Quartz"],
-    correct: 2,
-    explanation: "Diamond is the hardest known natural material. It's formed deep underground under intense heat and pressure."
-  },
-  {
-    question: "What do we call a scientist who studies rocks?",
-    options: ["Biologist", "Geologist", "Chemist", "Astronomer"],
-    correct: 1,
-    explanation: "Geologists study the Earth, including rocks, minerals, and the processes that shape the planet."
-  },
-  {
-    question: "How long does it take for the Earth to orbit the Sun once?",
-    options: ["24 hours", "30 days", "365 days", "10 years"],
-    correct: 2,
-    explanation: "It takes approximately 365.25 days for the Earth to complete one orbit around the Sun. That's why we have a leap year every 4 years!"
-  },
-  {
-    question: "What is the name of the galaxy we live in?",
-    options: ["Andromeda", "The Milky Way", "The Solar System", "The Universe"],
-    correct: 1,
-    explanation: "Our solar system is just a tiny part of a massive galaxy called the Milky Way, which contains billions of stars."
-  }
+  { question: "What causes day and night on Earth?", options: ["The Earth orbiting the Sun", "The Earth spinning on its axis", "The Moon blocking the Sun", "The Sun moving around the Earth"], correct: 1, explanation: "The Earth rotates (spins) on its axis every 24 hours. The side facing the Sun has day, and the side facing away has night." },
+  { question: "What is the center of our solar system?", options: ["The Earth", "The Moon", "The Sun", "Jupiter"], correct: 2, explanation: "The Sun is the center of our solar system. All the planets, including Earth, orbit around it." },
+  { question: "Which planet is known as the Red Planet?", options: ["Venus", "Mars", "Jupiter", "Saturn"], correct: 1, explanation: "Mars looks red because its soil is rich in iron oxide — basically rust!" },
+  { question: "What layer of the Earth do we live on?", options: ["The core", "The mantle", "The crust", "The atmosphere"], correct: 2, explanation: "The crust is the thin, rocky outer layer of the Earth. It's where all life exists." },
+  { question: "What causes the ocean tides?", options: ["Wind", "The Earth's rotation", "The Moon's gravity", "Fish swimming"], correct: 2, explanation: "The Moon's gravity pulls on the Earth's oceans, causing the water to bulge out towards the Moon. This creates high and low tides." },
+  { question: "What is the hardest natural substance on Earth?", options: ["Gold", "Iron", "Diamond", "Quartz"], correct: 2, explanation: "Diamond is the hardest known natural material. It's formed deep underground under intense heat and pressure." },
+  { question: "What do we call a scientist who studies rocks?", options: ["Biologist", "Geologist", "Chemist", "Astronomer"], correct: 1, explanation: "Geologists study the Earth, including rocks, minerals, and the processes that shape the planet." },
+  { question: "How long does it take for the Earth to orbit the Sun once?", options: ["24 hours", "30 days", "365 days", "10 years"], correct: 2, explanation: "It takes approximately 365.25 days for the Earth to complete one orbit around the Sun. That's why we have a leap year every 4 years!" },
+  { question: "What is the name of the galaxy we live in?", options: ["Andromeda", "The Milky Way", "The Solar System", "The Universe"], correct: 1, explanation: "Our solar system is just a tiny part of a massive galaxy called the Milky Way, which contains billions of stars." }
 ];
 
 /* ============================================================
-   THE QUIZ ENGINE (No need to edit below here)
+   THE QUIZ ENGINE & TIMER LOGIC
    ============================================================ */
 
-// --- CONFIGURATION ---
-const QUESTIONS_PER_ROUND = 10; // Change this if you want longer/shorter quizzes
-
+const QUESTIONS_PER_ROUND = 10; 
 let quizQuestions = [];
 let current = 0;
 let score = 0;
+let timeLimit = 10;
+let timeLeft = 0;
+let timerInterval = null;
+let isAnswered = false;
 
-const progressEl    = document.getElementById('progress');
-const questionEl    = document.getElementById('question');
-const optionsEl     = document.getElementById('options');
+// DOM Elements
+const startScreen = document.getElementById('start-screen');
+const quizScreen  = document.getElementById('quiz-screen');
+const endScreen   = document.getElementById('end-screen');
+const progressEl  = document.getElementById('progress');
+const scoreDisplay = document.getElementById('score-display');
+const questionEl  = document.getElementById('question');
+const optionsEl   = document.getElementById('options');
 const explanationEl = document.getElementById('explanation');
-const nextBtn       = document.getElementById('next-btn');
-const quizEl        = document.getElementById('quiz');
-const endEl         = document.getElementById('end');
-const endTitle      = document.getElementById('end-title');
-const endText       = document.getElementById('end-text');
-const restartBtn    = document.getElementById('restart-btn');
+const nextBtn     = document.getElementById('next-btn');
+const timerBar    = document.getElementById('timer-bar');
+const endTitle    = document.getElementById('end-title');
+const endText     = document.getElementById('end-text');
 
-// --- RANDOMIZER FUNCTIONS ---
-
-// This function shuffles an array like a deck of cards
+// --- RANDOMIZER ---
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -420,26 +296,38 @@ function shuffleArray(array) {
   return array;
 }
 
-// This function picks 10 random questions from the big pool
 function generateQuiz() {
-  // Copy the master list, shuffle it, then slice off the first 10
   quizQuestions = shuffleArray([...questions]).slice(0, QUESTIONS_PER_ROUND);
 }
 
-// --- CORE QUIZ LOGIC ---
+// --- GAME FLOW ---
+function startGame(seconds) {
+  timeLimit = seconds;
+  current = 0;
+  score = 0;
+  startScreen.style.display = 'none';
+  endScreen.style.display = 'none';
+  quizScreen.style.display = 'block';
+  generateQuiz();
+  showQuestion();
+}
 
 function showQuestion() {
   const q = quizQuestions[current];
+  isAnswered = false;
 
-  // Reset the screen for the new question
+  // Reset UI
   explanationEl.style.display = 'none';
   explanationEl.innerHTML = '';
   nextBtn.style.display = 'none';
-  progressEl.textContent = `Question ${current + 1} of ${quizQuestions.length}  ·  Score: ${score}`;
+  progressEl.textContent = `Question ${current + 1} of ${quizQuestions.length}`;
+  scoreDisplay.textContent = `Score: ${score}`;
   questionEl.textContent = q.question;
   optionsEl.innerHTML = '';
+  timerBar.style.width = '100%';
+  timerBar.style.background = '#00e676';
 
-  // Build one button per answer option
+  // Build buttons
   q.options.forEach(function (optionText, index) {
     const btn = document.createElement('button');
     btn.className = 'option';
@@ -447,14 +335,70 @@ function showQuestion() {
     btn.onclick = function () { checkAnswer(index, btn); };
     optionsEl.appendChild(btn);
   });
+
+  startTimer();
+}
+
+function startTimer() {
+  timeLeft = timeLimit;
+  updateTimerVisual();
+  
+  timerInterval = setInterval(() => {
+    timeLeft -= 0.1;
+    if (timeLeft <= 0) {
+      timeLeft = 0;
+      updateTimerVisual();
+      handleTimeout();
+    } else {
+      updateTimerVisual();
+    }
+  }, 100);
+}
+
+function stopTimer() {
+  clearInterval(timerInterval);
+}
+
+function updateTimerVisual() {
+  const percent = (timeLeft / timeLimit) * 100;
+  timerBar.style.width = percent + '%';
+  
+  if (timeLeft <= timeLimit * 0.3) {
+    timerBar.style.background = '#ff4d4d'; // Red
+  } else if (timeLeft <= timeLimit * 0.6) {
+    timerBar.style.background = '#ffaa00'; // Orange
+  } else {
+    timerBar.style.background = '#00e676'; // Green
+  }
+}
+
+function handleTimeout() {
+  if (isAnswered) return;
+  isAnswered = true;
+  stopTimer();
+
+  const q = quizQuestions[current];
+  const allButtons = document.querySelectorAll('.option');
+  allButtons.forEach(b => b.disabled = true);
+
+  // Highlight correct answer
+  allButtons[q.correct].classList.add('correct');
+  
+  explanationEl.innerHTML = '<strong>⏰ Time\'s up!</strong><br>' + q.explanation;
+  explanationEl.style.display = 'block';
+  
+  nextBtn.style.display = 'block';
+  nextBtn.textContent = (current === quizQuestions.length - 1) ? 'See my score →' : 'Next question →';
 }
 
 function checkAnswer(chosenIndex, clickedBtn) {
+  if (isAnswered) return;
+  isAnswered = true;
+  stopTimer();
+
   const q = quizQuestions[current];
   const allButtons = document.querySelectorAll('.option');
-
-  // Lock every button so they can't click twice
-  allButtons.forEach(function (b) { b.disabled = true; });
+  allButtons.forEach(b => b.disabled = true);
 
   if (chosenIndex === q.correct) {
     score++;
@@ -466,10 +410,9 @@ function checkAnswer(chosenIndex, clickedBtn) {
     explanationEl.innerHTML = '<strong>❌ Not quite — but now you know!</strong><br>' + q.explanation;
   }
 
-  progressEl.textContent = `Question ${current + 1} of ${quizQuestions.length}  ·  Score: ${score}`;
+  scoreDisplay.textContent = `Score: ${score}`;
   explanationEl.style.display = 'block';
-
-  nextBtn.style.display = 'inline-block';
+  nextBtn.style.display = 'block';
   nextBtn.textContent = (current === quizQuestions.length - 1) ? 'See my score →' : 'Next question →';
 }
 
@@ -482,41 +425,51 @@ nextBtn.onclick = function () {
   }
 };
 
+// --- END SCREEN & SCORING LOGIC ---
 function showEnd() {
-  quizEl.style.display = 'none';
-  endEl.style.display = 'block';
+  stopTimer();
+  quizScreen.style.display = 'none';
+  endScreen.style.display = 'block';
 
   const total = quizQuestions.length;
-  const percent = score / total;
+  let title = "";
+  let text = "";
 
-  if (percent === 1) {
-    endTitle.textContent = '🏆 ' + score + '/' + total + ' — perfect score!';
-    endText.textContent = "You didn't miss a single one. Genuinely impressive.";
-  } else if (percent >= 0.7) {
-    endTitle.textContent = '🎉 ' + score + '/' + total + ' — great job!';
-    endText.textContent = "You clearly know your stuff. A couple of sneaky ones got you, that's all.";
-  } else if (percent >= 0.4) {
-    endTitle.textContent = '👍 ' + score + '/' + total + ' — solid effort!';
-    endText.textContent = "You got a good chunk of them. Read back through the explanations and you'll nail it next time.";
-  } else {
-    endTitle.textContent = '🌱 ' + score + '/' + total + ' — good start!';
-    endText.textContent = "Everyone starts somewhere. The explanations are the whole point — now you know more than you did five minutes ago.";
+  // Exact scoring logic requested by user
+  if (timeLimit === 10) {
+    if (score === 10) { title = '🏆 Excellent!'; text = "Perfect score! You are a science genius."; }
+    else if (score === 9) { title = '🌟 Good!'; text = "So close to perfect! Excellent work."; }
+    else if (score === 8) { title = '👍 Fair!'; text = "Solid effort, you clearly know your stuff."; }
+    else { title = '🌱 Keep Trying!'; text = "Every mistake is a chance to learn. Review and try again, you've got this!"; }
+  } 
+  else if (timeLimit === 5) {
+    if (score >= 8) { title = '🏆 Excellent!'; text = "Incredible speed and accuracy! You're a natural."; }
+    else if (score >= 6) { title = '🌟 Good!'; text = "Great job under pressure! Fast thinking."; }
+    else if (score >= 4) { title = '👍 Fair!'; text = "Not bad for a moderate pace! Keep it up."; }
+    else { title = '🌱 Keep Trying!'; text = "Speed is tough. Take a breath, review, and go again!"; }
+  } 
+  else if (timeLimit === 3) {
+    if (score >= 7) { title = '🏆 Excellent!'; text = "Lightning fast reflexes and knowledge! Unstoppable!"; }
+    else if (score >= 5) { title = '🌟 Good!'; text = "Blazing speed! You did great under pressure."; }
+    else if (score >= 3) { title = '👍 Fair!'; text = "You survived the blitz! That's no easy feat."; }
+    else { title = '🌱 Keep Trying!'; text = "Blitz mode is brutal. Try moderate or slow to warm up!"; }
   }
+
+  endTitle.textContent = title + ` (${score}/${total})`;
+  endText.textContent = text;
 }
 
-restartBtn.onclick = function () {
-  generateQuiz(); // Pick a brand new set of 10 random questions!
-  current = 0;
-  score = 0;
-  endEl.style.display = 'none';
-  quizEl.style.display = 'block';
-  showQuestion();
-};
+function goToMainMenu() {
+  endScreen.style.display = 'none';
+  startScreen.style.display = 'block';
+}
 
-// --- START THE QUIZ ---
+function restartSameMode() {
+  startGame(timeLimit);
+}
+
+// Initialize
 generateQuiz();
-showQuestion();
-
 </script>
 
 </body>
